@@ -1,1 +1,4 @@
+spotipy
+python-dotenv
 smolagents
+litellm
