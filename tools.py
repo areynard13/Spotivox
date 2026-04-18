@@ -145,3 +145,30 @@ def list_my_playlists() -> str:
     playlists = sp.current_user_playlists()
     names = [p['name'] for p in playlists['items']]
     return ", ".join(names)
+
+# ————— Queue & Volume management ———————————————
+@tool
+def set_volume(level: int) -> bool:
+    """
+    Adjusts the Spotify volume (0 to 100).
+    Args:
+        level: The level of the spotify volume, between 0 and 100
+    Return: bool - the success of the action
+    """
+    sp.volume(level)
+    return True
+
+@tool
+def add_to_queue(song_name: str) -> bool:
+    """
+    Adds a song to the end of the current playback queue without stopping current music.
+    Args:
+        song_name: The name of the song to add.
+    Return: bool - the success of the action
+    """
+    results = sp.search(q=song_name, limit=1, type="track")
+    if results['tracks']['items']:
+        uri = results['tracks']['items'][0]['uri']
+        sp.add_to_queue(uri=uri)
+        return True
+    return False
