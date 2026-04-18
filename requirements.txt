@@ -5,3 +5,5 @@ litellm
 pyyaml
 SpeechRecognition
 PyAudio
+openai-whisper
+soundfile
