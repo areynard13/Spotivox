@@ -7,3 +7,5 @@ SpeechRecognition
 PyAudio
 openai-whisper
 soundfile
+edge-tts
+pygame
