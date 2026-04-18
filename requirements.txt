@@ -3,3 +3,5 @@ python-dotenv
 smolagents
 litellm
 pyyaml
+SpeechRecognition
+PyAudio
