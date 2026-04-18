@@ -71,3 +71,77 @@ def skip_previous() -> bool:
     """
     sp.previous_track()
     return True
+
+# ————— Playlist Controls ———————————————————————
+@tool
+def play_last_added_tracks(playlist_name: str, count: int) -> dict:
+    """
+    Finds a playlist by name and plays the 'count' most recently added tracks.
+    Args:
+        playlist_name: The name or partial name of the playlist.
+        count: The number of tracks to play
+    Return: dict - the success of the action (success) with explanation if false (message)
+    """
+    playlists = sp.current_user_playlists()
+    target = next(
+        (p for p in playlists['items'] if playlist_name.lower() in p['name'].lower()),
+        None
+    )
+
+    if not target:
+        return {"success": False, "message": f"Playlist {playlist_name} not found"}
+
+    total_tracks = target['items']['total']
+    start_index = max(0, total_tracks - count)
+
+    results = sp.playlist_items(
+        target['id'], 
+        limit=count, 
+        offset=start_index
+    )
+    items = results['items'][::-1]
+    uris = [item['item']['uri'] for item in items if item.get('item')]
+
+    for uri in uris:
+        sp.add_to_queue(uri)
+
+    return {
+        "success": True,
+        "message": ""
+    }
+
+@tool
+def play_playlist(playlist_name: str) -> bool:
+    """
+    Finds a playlist by name and starts playing it.
+    Args:
+        playlist_name: The name or part of the name of the playlist to start.
+    Return: bool - the success of the action
+    """
+    results = sp.current_user_playlists()
+    
+    target_playlist = next(
+        (p for p in results['items'] if playlist_name.lower() in p['name'].lower()), 
+        None
+    )
+    
+    if target_playlist:
+        playlist_uri = target_playlist['uri']
+        try:
+            sp.start_playback(context_uri=playlist_uri)
+            return True
+        except Exception as e:
+            return False
+            
+    return False
+
+@tool
+def list_my_playlists() -> str:
+    """
+    Retrieves the names of all your playlists. 
+    Use this to verify if a playlist exists before trying to play it.
+    Return: str - All playlists name separate by ','
+    """
+    playlists = sp.current_user_playlists()
+    names = [p['name'] for p in playlists['items']]
+    return ", ".join(names)
