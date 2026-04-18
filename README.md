@@ -1,0 +1,2 @@
+# Spotivox
+Spotivox is a voice-controlled interface designed for task execution through an autonomous agent architecture. The system utilizes local wake word detection to trigger interactions, ensuring data privacy and low-latency response times.
