@@ -72,6 +72,21 @@ def skip_previous() -> bool:
     sp.previous_track()
     return True
 
+@tool
+def set_shuffle(state: bool) -> bool:
+    """
+    Toggles the shuffle mode on or off for the current playback.
+    Args:
+        state: True to enable shuffle, False to disable it.
+    Return: bool - the success of the action
+    """
+    try:
+        sp.shuffle(state)
+        status = "enabled" if state else "disabled"
+        return True
+    except Exception as e:
+        return False
+
 # ————— Playlist Controls ———————————————————————
 @tool
 def play_last_added_tracks(playlist_name: str, count: int) -> dict:
@@ -146,18 +161,7 @@ def list_my_playlists() -> str:
     names = [p['name'] for p in playlists['items']]
     return ", ".join(names)
 
-# ————— Queue & Volume management ———————————————
-@tool
-def set_volume(level: int) -> bool:
-    """
-    Adjusts the Spotify volume (0 to 100).
-    Args:
-        level: The level of the spotify volume, between 0 and 100
-    Return: bool - the success of the action
-    """
-    sp.volume(level)
-    return True
-
+# ————— Queue ———————————————————————————————————
 @tool
 def add_to_queue(song_name: str) -> bool:
     """
