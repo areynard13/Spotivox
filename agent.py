@@ -1,9 +1,14 @@
 import os
+import yaml
 from dotenv import load_dotenv
 from smolagents import CodeAgent, LiteLLMModel
 from tools import *
 
 load_dotenv()
+
+with open("instructions.yaml", "r", encoding="utf-8") as f:
+    instructions = yaml.safe_load(f)
+    system_prompt_content = instructions.get("system_prompt", "")
 
 model = LiteLLMModel(
     model_id="groq/llama-3.1-8b-instant", 
@@ -26,3 +31,5 @@ agent = CodeAgent(
     model=model,
     add_base_tools=False,
 )
+
+agent.prompt_templates["system_prompt"] = system_prompt_content
