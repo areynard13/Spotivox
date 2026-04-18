@@ -21,81 +21,73 @@ except Exception as e:
 
 # ————— Basic Controls ——————————————————————————
 @tool
-def  play_track(song_name: str) -> bool:
+def play_track(song_name: str) -> str:
     """
     Searches for a specific song and starts playback
     Args:
         song_name: The name of the song to play
-    Return: bool - the success of the action
     """
     results = sp.search(q=song_name, limit=1, type='track')
     if results['tracks']['items']:
         uri = results['tracks']['items'][0]['uri']
         name = results['tracks']['items'][0]['name']
         sp.start_playback(uris=[uri])
-        return True
-    return False
+        return f"Successfully started playing '{name}'."
+    return f"Track '{song_name}' not found."
 
 @tool
-def pause_playback() -> bool:
+def pause_playback() -> str:
     """
     Pauses the current music playback
-    Return: bool - the success of the action
     """
     sp.pause_playback()
-    return True
+    return "Playback paused."
 
 @tool
-def resume_playback() -> bool:
+def resume_playback() -> str:
     """
     Resumes the current music playback.
-    Return: bool - the success of the action
     """
     sp.start_playback()
-    return True
+    return "Playback resumed."
 
 @tool
-def skip_next() -> bool:
+def skip_next() -> str:
     """
     Skips to the next track in the queue.
-    Return: bool - the success of the action
     """
     sp.next_track()
-    return True
+    return "Skipped to the next track."
 
 @tool
-def skip_previous() -> bool:
+def skip_previous() -> str:
     """
     Skips to the previous track.
-    Return: bool - the success of the action
     """
     sp.previous_track()
-    return True
+    return "Skipped back to the previous track."
 
 @tool
-def set_shuffle(state: bool) -> bool:
+def set_shuffle(state: bool) -> str:
     """
     Toggles the shuffle mode on or off for the current playback.
     Args:
         state: True to enable shuffle, False to disable it.
-    Return: bool - the success of the action
     """
     try:
         sp.shuffle(state)
-        status = "enabled" if state else "disabled"
-        return True
+        return f"Shuffle mode set to {state}."
     except Exception as e:
-        return False
+        return f"Failed to set shuffle: {e}"
 
 # ————— Playlist Controls ———————————————————————
 @tool
-def play_last_added_tracks(playlist_name: str, count: int) -> dict:
+def play_last_added_tracks(playlist_name: str, count: int) -> str:
     """
     Finds a playlist by name and plays the 'count' most recently added tracks.
     Args:
         playlist_name: The name or partial name of the playlist.
         count: The number of tracks to play
-    Return: dict - the success of the action (success) with explanation if false (message)
     """
     playlists = sp.current_user_playlists()
     target = next(
@@ -104,7 +96,7 @@ def play_last_added_tracks(playlist_name: str, count: int) -> dict:
     )
 
     if not target:
-        return {"success": False, "message": f"Playlist {playlist_name} not found"}
+        return f"Playlist '{playlist_name}' not found."
 
     total_tracks = target['items']['total']
     start_index = max(0, total_tracks - count)
@@ -120,18 +112,14 @@ def play_last_added_tracks(playlist_name: str, count: int) -> dict:
     for uri in uris:
         sp.add_to_queue(uri)
 
-    return {
-        "success": True,
-        "message": ""
-    }
+    return f"Added the last {len(uris)} tracks from playlist '{target['name']}' to the queue."
 
 @tool
-def play_playlist(playlist_name: str) -> bool:
+def play_playlist(playlist_name: str) -> str:
     """
     Finds a playlist by name and starts playing it.
     Args:
         playlist_name: The name or part of the name of the playlist to start.
-    Return: bool - the success of the action
     """
     results = sp.current_user_playlists()
     
@@ -144,11 +132,11 @@ def play_playlist(playlist_name: str) -> bool:
         playlist_uri = target_playlist['uri']
         try:
             sp.start_playback(context_uri=playlist_uri)
-            return True
+            return f"Now playing playlist: {target_playlist['name']}."
         except Exception as e:
-            return False
+            return f"Error trying to play playlist: {e}"
             
-    return False
+    return f"Playlist '{playlist_name}' not found."
 
 @tool
 def list_my_playlists() -> str:
@@ -163,23 +151,22 @@ def list_my_playlists() -> str:
 
 # ————— Queue ———————————————————————————————————
 @tool
-def add_to_queue(song_name: str) -> bool:
+def add_to_queue(song_name: str) -> str:
     """
     Adds a song to the end of the current playback queue without stopping current music.
     Args:
         song_name: The name of the song to add.
-    Return: bool - the success of the action
     """
     results = sp.search(q=song_name, limit=1, type="track")
     if results['tracks']['items']:
         uri = results['tracks']['items'][0]['uri']
         sp.add_to_queue(uri=uri)
-        return True
-    return False
+        return f"Added '{song_name}' to the queue."
+    return f"Could not find track '{song_name}' to add to queue."
 
 # ————— Informations Tools ——————————————————————
 @tool
-def get_current_track_info() -> dict:
+def get_current_track_info() -> str:
     """
     Returns the name and artist of the song currently playing.
     """
@@ -187,5 +174,5 @@ def get_current_track_info() -> dict:
     if track and track['is_playing']:
         name = track['item']['name']
         artist = track['item']['artists'][0]['name']
-        return {'artist': artist, 'name': name}
-    return {'artist': '', 'name': ''}
+        return f"Currently playing '{name}' by {artist}."
+    return "No track is currently playing."
