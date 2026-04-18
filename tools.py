@@ -172,3 +172,16 @@ def add_to_queue(song_name: str) -> bool:
         sp.add_to_queue(uri=uri)
         return True
     return False
+
+# ————— Informations Tools ——————————————————————
+@tool
+def get_current_track_info() -> dict:
+    """
+    Returns the name and artist of the song currently playing.
+    """
+    track = sp.current_playback()
+    if track and track['is_playing']:
+        name = track['item']['name']
+        artist = track['item']['artists'][0]['name']
+        return {'artist': artist, 'name': name}
+    return {'artist': '', 'name': ''}
