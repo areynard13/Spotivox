@@ -3,6 +3,7 @@ from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
 from smolagents import tool
 from dotenv import load_dotenv
+from rapidfuzz import process, utils
 
 load_dotenv()
 
@@ -117,26 +118,39 @@ def play_last_added_tracks(playlist_name: str, count: int) -> str:
 @tool
 def play_playlist(playlist_name: str) -> str:
     """
-    Finds a playlist by name and starts playing it.
+    Finds the best matching playlist by name and starts playing it.
     Args:
-        playlist_name: The name or part of the name of the playlist to start.
+        playlist_name: The name or partial name of the playlist.
     """
-    results = sp.current_user_playlists()
-    
-    target_playlist = next(
-        (p for p in results['items'] if playlist_name.lower() in p['name'].lower()), 
-        None
-    )
-    
-    if target_playlist:
-        playlist_uri = target_playlist['uri']
-        try:
-            sp.start_playback(context_uri=playlist_uri)
-            return f"Now playing playlist: {target_playlist['name']}."
-        except Exception as e:
-            return f"Error trying to play playlist: {e}"
-            
-    return f"Playlist '{playlist_name}' not found."
+    try:
+        results = sp.current_user_playlists()
+        if not results['items']:
+            return "You don't have any playlists in your library."
+
+        playlists_map = {p['name']: p['uri'] for p in results['items']}
+        playlist_names = list(playlists_map.keys())
+
+        match = process.extractOne(
+            playlist_name, 
+            playlist_names, 
+            processor=utils.default_process,
+            score_cutoff=60
+        )
+
+        if match:
+            best_name, score, _ = match
+            uri = playlists_map[best_name]
+
+            sp.start_playback(context_uri=uri)
+            return f"Playing your '{best_name}' playlist (match score: {int(score)}%)."
+
+        top_5 = ", ".join(playlist_names[:5])
+        return f"Could not find a match for '{playlist_name}'. Your top playlists are: {top_5}."
+
+    except Exception as e:
+        if "device" in str(e).lower():
+            return "Error: No active Spotify device found. Please open Spotify on your phone first."
+        return f"An error occurred: {str(e)}"
 
 @tool
 def list_my_playlists() -> str:
