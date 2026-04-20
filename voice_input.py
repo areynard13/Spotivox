@@ -16,7 +16,7 @@ def listen_command():
         try:
             audio = recognizer.listen(source, timeout=10, phrase_time_limit=15)
             print("Transcribing...")
-            text = recognizer.recognize_whisper(audio, model="tiny", language="french")
+            text = recognizer.recognize_whisper(audio, model="base", language="french")
             return text.strip()
             
         except sr.WaitTimeoutError:
