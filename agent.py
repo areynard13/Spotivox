@@ -29,7 +29,8 @@ agent = CodeAgent(
         get_current_track_info
     ],
     model=model,
-    add_base_tools=False,
+    add_base_tools=True,
+    additional_authorized_imports=[],
 )
 
 agent.prompt_templates["system_prompt"] = system_prompt_content
