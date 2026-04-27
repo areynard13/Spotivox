@@ -9,4 +9,8 @@ openai-whisper
 soundfile
 edge-tts
 pygame
-apidfuzz
+rapidfuzz
+openwakeword
+pyaudio
+numpy
+ddgs
